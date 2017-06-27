@@ -48,3 +48,4 @@ AUTHORS
 *.trace/
 *.tiff
 .ipynb_checkpoints
+.idea/
