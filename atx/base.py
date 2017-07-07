@@ -7,8 +7,12 @@ import subprocess
 import random
 import string
 import time
+import cv2
 import logging
 import threading
+from PIL import Image
+from fractions import Fraction
+import imutils
 
 from atx import strutils
 
@@ -201,6 +205,49 @@ def lookup_image(fsearch, width=0, height=0):
         filepath = os.path.join(dirname, file)
         if filename_match(fsearch, filepath, width, height):
             return filepath
+
+
+def strip_fraction(some_name_prefix):
+    post = None
+    wid, ht = None, None
+    if '@' in some_name_prefix:
+        post = some_name_prefix.split('@')[-1]
+    if '.' in some_name_prefix:
+        post = some_name_prefix.split('.')[-1]
+    if post is not None and 'x' in post:
+        swid, sht = post.split('x')
+        wid, ht = int(swid), int(sht)
+    return (wid, ht)
+
+
+def resolution_scaling(fsearch, width=0, height=0):
+    if height == 0:
+        return None
+    matched_path = None
+    factor = 1.0
+    dirname = os.path.dirname(fsearch)
+    for file in os.listdir(dirname):
+        prefix, _ = os.path.splitext(file)
+        wid, ht = strip_fraction(prefix)
+        if Fraction(width, height) == Fraction(wid, ht):
+            factor = 1.0 * width  / wid
+            matched_path = os.path.join(dirname, file)
+            break
+        if Fraction(height, width) == Fraction(wid, ht):
+            factor = 1.0 * width / ht
+            matched_path = os.path.join(dirname, file)
+            break
+    if matched_path:
+        _img = imutils.open(matched_path)
+        if factor > 1.0:
+            return cv2.resize(_img, (0, 0), fx=factor, fy=factor, interpolation=cv2.INTER_CUBIC)
+        elif factor < 1.0:
+            _height, _width = _img.shape[:2]
+            size = (int(_width * factor), int(_height * factor))
+            return cv2.resize(_img, size, interpolation=cv2.INTER_AREA)
+        else:
+            return _img
+    return None
 
 
 def nameddict(name, props):

@@ -153,7 +153,7 @@ class AndroidDevice(DeviceMixin, UiaDevice):
         return self.info['currentPackageName']
 
     def is_app_alive(self, package_name):
-        """ Deprecated: use current_package_name instaed.
+        """ Deprecated: use current_package_name instead.
         Check if app in running in foreground """
         return self.info['currentPackageName'] == package_name
 
@@ -166,7 +166,7 @@ class AndroidDevice(DeviceMixin, UiaDevice):
 
     @property
     def display(self):
-        """Virtual keyborad may get small d.info['displayHeight']
+        """Virtual keyboard may get small d.info['displayHeight']
         """
         if self.__display:
             return self.__display

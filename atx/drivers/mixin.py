@@ -28,7 +28,6 @@ from atx import logutils
 from atx.base import nameddict
 from atx.drivers import Pattern, Bounds, FindPoint
 
-
 warnings.simplefilter('default')
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
@@ -102,7 +101,11 @@ class DeviceMixin(object):
     def _open_image_file(self, path):
         realpath = base.lookup_image(path, self.__screensize[0], self.__screensize[1])
         if realpath is None:
-            raise IOError('file not found: {}'.format(path))
+            res = base.resolution_scaling(path, self.__screensize[0], self.__screensize[1])
+            if res is not None:
+                return res
+            else:
+                raise IOError('file not found: {}'.format(path))
         return imutils.open(realpath)
 
     def pattern_open(self, image):
